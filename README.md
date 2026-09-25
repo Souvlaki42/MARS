@@ -46,12 +46,12 @@ On Windows, either use `./gradlew.bat build` with `java -jar build/libs/Mars-4.6
 
 ## Credits
 
-Obviously, thanks to [Pete Sanderson](https://github.com/dpetersanderson) for making the original app
-Thanks to [Steven](https://github.com/ste-lam) for contributing most of the PRs mentioned
-Thanks to [Daniel Dimitrov](https://github.com/danieldimitrov86) for the directory persistence PR
-Thanks to [Daniel Gyoerffy](https://github.com/Dansoftowner) for the jSystemThemeDetector library
-Thanks to [Flatlaf](https://www.formdev.com/flatlaf/) for the legacy Java theming and modern display features support
+Obviously, thanks to [Pete Sanderson](https://github.com/dpetersanderson) for making the original app. \
+Thanks to [Steven](https://github.com/ste-lam) for contributing most of the PRs mentioned. \
+Thanks to [Daniel Dimitrov](https://github.com/danieldimitrov86) for the directory persistence PR. \
+Thanks to [Daniel Gyoerffy](https://github.com/Dansoftowner) for the jSystemThemeDetector library. \
+Thanks to [Flatlaf](https://www.formdev.com/flatlaf/) for the legacy Java theming and modern display features support.
 
 ## License
 
-This fork is also licensed under the original MIT License. Check [LICENSE](./LICENSE) for details
+This fork is also licensed under the original MIT License. Check [LICENSE](./LICENSE) for details.
