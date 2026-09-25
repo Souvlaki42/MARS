@@ -28,5 +28,5 @@ jar {
 }
 
 dependencies {
-    implementation 'com.formdev:flatlaf:3.6.2'
+    implementation 'com.formdev:flatlaf:3.7.2'
 }
