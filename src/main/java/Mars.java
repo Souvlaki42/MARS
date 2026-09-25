@@ -36,9 +36,9 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
 
-import com.formdev.flatlaf.FlatDarkLaf;
 import com.formdev.flatlaf.FlatLaf;
-import com.formdev.flatlaf.FlatLightLaf;
+import com.formdev.flatlaf.intellijthemes.FlatArcDarkIJTheme;
+import com.formdev.flatlaf.intellijthemes.FlatArcIJTheme;
 import com.jthemedetecor.OsThemeDetector;
 
 public class Mars {
@@ -48,18 +48,18 @@ public class Mars {
         final boolean isDarkThemeUsed = detector.isDark();
 
         if (isDarkThemeUsed) {
-            FlatDarkLaf.setup();
+            FlatArcDarkIJTheme.setup();
         } else {
-            FlatLightLaf.setup();
+            FlatArcIJTheme.setup();
         }
 
         detector.registerListener(isDark -> {
             SwingUtilities.invokeLater(() -> {
                 try {
                     if (isDark) {
-                        UIManager.setLookAndFeel(new FlatDarkLaf());
+                        UIManager.setLookAndFeel(new FlatArcDarkIJTheme());
                     } else {
-                        UIManager.setLookAndFeel(new FlatLightLaf());
+                        UIManager.setLookAndFeel(new FlatArcIJTheme());
                     }
                     FlatLaf.updateUI();
                 } catch (Exception e) {

@@ -21,10 +21,10 @@ Until October 2024 the MARS website, including executable JAR file download, was
 This fork includes [Flatlaf](https://www.formdev.com/flatlaf/) to allow for:
 
 - Partial dark mode support
+- Intellij theme support
 - Native window decorations
 - High DPI displays
 - Automatic theme delection using [jSystemThemeDetector](https://github.com/Dansoftowner/jSystemThemeDetector)
-- Optionally, Intellij theme support
 - And more...
 
 ## Merged PRs and fixed issues

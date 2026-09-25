@@ -32,4 +32,5 @@ dependencies {
     implementation 'com.github.Dansoftowner:jSystemThemeDetector:3.9.1'
     implementation 'ch.qos.logback:logback-core:1.2.3'
     implementation 'ch.qos.logback:logback-classic:1.2.3'
+    implementation 'com.formdev:flatlaf-intellij-themes:3.7.2'
 }
