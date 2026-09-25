@@ -25,7 +25,8 @@ This fork includes [Flatlaf](https://www.formdev.com/flatlaf/) to allow for:
 - Native window decorations
 - High DPI displays
 - Automatic theme delection using [jSystemThemeDetector](https://github.com/Dansoftowner/jSystemThemeDetector)
-- And more...
+
+And more...
 
 ## List of merged upstream PRs and fixed issues
 
@@ -33,15 +34,17 @@ This fork includes [Flatlaf](https://www.formdev.com/flatlaf/) to allow for:
 - [dpetersanderson #4](https://github.com/dpetersanderson/MARS/pull/4)
 - [dpetersanderson @11](https://github.com/dpetersanderson/MARS/issues/11)
 - [dpetersanderson #24](https://github.com/dpetersanderson/MARS/pull/24)
+- [dpetersanderson #26](https://github.com/dpetersanderson/MARS/pull/26)
+- [dpetersanderson #27](https://github.com/dpetersanderson/MARS/pull/27)
 
 ## Screenshot
 
-![How the app looks like now](screenshot.png)
+![How the app looks like now](./screenshot.png)
 
 ## How to run
 
-First, Install Java 25 on your system. Then:
-On Linux or Mac, either use `./gradlew build` with `java -jar build/libs/Mars-4.6.jar` or `./gradlew run`
+First, Install Java 25 on your system. Then: \
+On Linux or Mac, either use `./gradlew build` with `java -jar build/libs/Mars-4.6.jar` or `./gradlew run` \
 On Windows, either use `./gradlew.bat build` with `java -jar build/libs/Mars-4.6.jar` or `./gradlew.bat run`
 
 ## Credits
