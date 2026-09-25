@@ -27,18 +27,31 @@ This fork includes [Flatlaf](https://www.formdev.com/flatlaf/) to allow for:
 - Automatic theme delection using [jSystemThemeDetector](https://github.com/Dansoftowner/jSystemThemeDetector)
 - And more...
 
-## Merged PRs and fixed issues
+## List of merged upstream PRs and fixed issues
 
-- https://github.com/dpetersanderson/MARS/pull/10
-- https://github.com/dpetersanderson/MARS/pull/4
-- https://github.com/dpetersanderson/MARS/issues/11
+- [dpetersanderson #10](https://github.com/dpetersanderson/MARS/pull/10)
+- [dpetersanderson #4](https://github.com/dpetersanderson/MARS/pull/4)
+- [dpetersanderson @11](https://github.com/dpetersanderson/MARS/issues/11)
+- [dpetersanderson #24](https://github.com/dpetersanderson/MARS/pull/24)
 
 ## Screenshot
 
-![how the app looks like now](screenshot.png)
+![How the app looks like now](screenshot.png)
 
 ## How to run
 
-- Install Java 11+ on your system
-- On Linux/Mac, either use `./gradlew build` with `java -jar build/libs/Mars-4.6.jar` or `./gradlew run`
-- On Windows, either use `./gradlew.bat build` with `java -jar build/libs/Mars-4.6.jar` or `./gradlew.bat run`
+First, Install Java 25 on your system. Then:
+On Linux or Mac, either use `./gradlew build` with `java -jar build/libs/Mars-4.6.jar` or `./gradlew run`
+On Windows, either use `./gradlew.bat build` with `java -jar build/libs/Mars-4.6.jar` or `./gradlew.bat run`
+
+## Credits
+
+Obviously, thanks to [Pete Sanderson](https://github.com/dpetersanderson) for making the original app
+Thanks to [Steven](https://github.com/ste-lam) for contributing most of the PRs mentioned
+Thanks to [Daniel Dimitrov](https://github.com/danieldimitrov86) for the directory persistence PR
+Thanks to [Daniel Gyoerffy](https://github.com/Dansoftowner) for the jSystemThemeDetector library
+Thanks to [Flatlaf](https://www.formdev.com/flatlaf/) for the legacy Java theming and modern display features support
+
+## License
+
+This fork is also licensed under the original MIT License. Check [LICENSE](./LICENSE) for details
