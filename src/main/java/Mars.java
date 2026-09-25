@@ -33,12 +33,41 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  * @version March 2006
  **/
 
+import javax.swing.SwingUtilities;
+import javax.swing.UIManager;
+
 import com.formdev.flatlaf.FlatDarkLaf;
+import com.formdev.flatlaf.FlatLaf;
+import com.formdev.flatlaf.FlatLightLaf;
+import com.jthemedetecor.OsThemeDetector;
 
 public class Mars {
 
     public static void main(String[] args) {
-        FlatDarkLaf.setup();
+        final OsThemeDetector detector = OsThemeDetector.getDetector();
+        final boolean isDarkThemeUsed = detector.isDark();
+
+        if (isDarkThemeUsed) {
+            FlatDarkLaf.setup();
+        } else {
+            FlatLightLaf.setup();
+        }
+
+        detector.registerListener(isDark -> {
+            SwingUtilities.invokeLater(() -> {
+                try {
+                    if (isDark) {
+                        UIManager.setLookAndFeel(new FlatDarkLaf());
+                    } else {
+                        UIManager.setLookAndFeel(new FlatLightLaf());
+                    }
+                    FlatLaf.updateUI();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            });
+        });
+
         new mars.MarsLaunch(args);
     }
 }
