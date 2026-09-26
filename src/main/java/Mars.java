@@ -31,43 +31,43 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  *
  * @author Pete Sanderson
  * @version March 2006
- **/
-
-import javax.swing.SwingUtilities;
-import javax.swing.UIManager;
-
+ */
 import com.formdev.flatlaf.FlatLaf;
 import com.formdev.flatlaf.intellijthemes.FlatArcDarkIJTheme;
 import com.formdev.flatlaf.intellijthemes.FlatArcIJTheme;
 import com.jthemedetecor.OsThemeDetector;
+import javax.swing.SwingUtilities;
+import javax.swing.UIManager;
 
 public class Mars {
 
-    public static void main(String[] args) {
-        final OsThemeDetector detector = OsThemeDetector.getDetector();
-        final boolean isDarkThemeUsed = detector.isDark();
+  public static void main(String[] args) {
+    final OsThemeDetector detector = OsThemeDetector.getDetector();
+    final boolean isDarkThemeUsed = detector.isDark();
 
-        if (isDarkThemeUsed) {
-            FlatArcDarkIJTheme.setup();
-        } else {
-            FlatArcIJTheme.setup();
-        }
+    if (isDarkThemeUsed) {
+      FlatArcDarkIJTheme.setup();
+    } else {
+      FlatArcIJTheme.setup();
+    }
 
-        detector.registerListener(isDark -> {
-            SwingUtilities.invokeLater(() -> {
+    detector.registerListener(
+        isDark -> {
+          SwingUtilities.invokeLater(
+              () -> {
                 try {
-                    if (isDark) {
-                        UIManager.setLookAndFeel(new FlatArcDarkIJTheme());
-                    } else {
-                        UIManager.setLookAndFeel(new FlatArcIJTheme());
-                    }
-                    FlatLaf.updateUI();
+                  if (isDark) {
+                    UIManager.setLookAndFeel(new FlatArcDarkIJTheme());
+                  } else {
+                    UIManager.setLookAndFeel(new FlatArcIJTheme());
+                  }
+                  FlatLaf.updateUI();
                 } catch (Exception e) {
-                    e.printStackTrace();
+                  e.printStackTrace();
                 }
-            });
+              });
         });
 
-        new mars.MarsLaunch(args);
-    }
+    new mars.MarsLaunch(args);
+  }
 }
