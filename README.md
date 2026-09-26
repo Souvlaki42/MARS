@@ -41,19 +41,22 @@ And more...
 
 ![How the app looks like now](./screenshot.png)
 
-## How to run
+## How to use
 
-First, Install Java 25 on your system. Then: \
-On Linux or Mac, either use `./gradlew build` with `java -jar build/libs/Mars-4.6.jar` or `./gradlew run` \
-On Windows, either use `./gradlew.bat build` with `java -jar build/libs/Mars-4.6.jar` or `./gradlew.bat run`
+First, Install Java 25 on your system. \
+Choose a gradle wrapper base on your OS: \
+On Windows use `./gradlew.bat`. Otherwise use `./gradlew`. \
+Lastly, use `build` command to create `build/libs/Mars-4.6.jar` file and run it with `java -jar build/libs/Mars-4.6.jar` \
+Or run it directly with the `run` command. Format it with the `spotlessApply` command.
 
 ## Credits
 
 Obviously, thanks to [Pete Sanderson](https://github.com/dpetersanderson) for making the original app. \
+Thanks to [Flatlaf](https://www.formdev.com/flatlaf/) for the legacy Java theming and modern display features support. \
 Thanks to [Steven](https://github.com/ste-lam) for contributing most of the PRs mentioned. \
 Thanks to [Daniel Dimitrov](https://github.com/danieldimitrov86) for the directory persistence PR. \
 Thanks to [Daniel Gyoerffy](https://github.com/Dansoftowner) for the jSystemThemeDetector library. \
-Thanks to [Flatlaf](https://www.formdev.com/flatlaf/) for the legacy Java theming and modern display features support.
+Thanks to [Google](https://github.com/google) and [Spotless](https://github.com/diffplug/spotless) for their java formatting tools.
 
 ## License
 

@@ -1,7 +1,7 @@
-
 plugins {
     // Apply the application plugin to add support for building a CLI application in Java.
-    id 'application'
+    id("com.diffplug.spotless") version "8.10.3"
+    id('application')
 }
 
 version = '9.8.0'
@@ -28,9 +28,24 @@ jar {
 }
 
 dependencies {
-    implementation 'com.formdev:flatlaf:3.7.2'
-    implementation 'com.github.Dansoftowner:jSystemThemeDetector:3.9.1'
-    implementation 'ch.qos.logback:logback-core:1.2.3'
-    implementation 'ch.qos.logback:logback-classic:1.2.3'
-    implementation 'com.formdev:flatlaf-intellij-themes:3.7.2'
+    implementation('com.formdev:flatlaf:3.7.2')
+    implementation('com.github.Dansoftowner:jSystemThemeDetector:3.9.1')
+    implementation('ch.qos.logback:logback-core:1.2.3')
+    implementation('ch.qos.logback:logback-classic:1.2.3')
+    implementation('com.formdev:flatlaf-intellij-themes:3.7.2')
+    implementation("com.diffplug.spotless:com.diffplug.spotless.gradle.plugin:8.10.3")
+}
+
+spotless {
+  ratchetFrom 'origin/main'
+  format 'misc', {
+    target '*.gradle', '.gitattributes', '.gitignore'
+    trimTrailingWhitespace()
+    leadingTabsToSpaces()
+    endWithNewline()
+  }
+  java {
+    googleJavaFormat()
+    formatAnnotations()
+  }
 }
