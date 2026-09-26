@@ -188,7 +188,7 @@ public class Settings extends Observable {
    */
   public static boolean[] defaultBooleanSettingsValues = { // match the above list by position
     true, false, false, false, false, true, true, false, false, true, false, false, true, true,
-    false, true, true, false, false, true, false
+    false, true, true, true, false, true, false
   };
 
   // STRING SETTINGS. Each array position has associated name.
