@@ -1,8 +1,9 @@
 package mars.mips.dump;
 
-import java.lang.reflect.*;
-import java.util.*;
-import mars.util.*;
+import java.lang.reflect.Modifier;
+import java.util.ArrayList;
+import java.util.List;
+import mars.util.FilenameFinder;
 
 /*
 Copyright (c) 2003-2008,  Pete Sanderson and Kenneth Vollmar
@@ -42,7 +43,6 @@ public class DumpFormatLoader {
 
   private static final String CLASS_PREFIX = "mars.mips.dump.";
   private static final String DUMP_DIRECTORY_PATH = "mars/mips/dump";
-  private static final String SYSCALL_INTERFACE = "DumpFormat.class";
   private static final String CLASS_EXTENSION = "class";
 
   private static List<DumpFormat> formatList = null;
@@ -66,11 +66,11 @@ public class DumpFormatLoader {
           // grab the class, make sure it implements DumpFormat, instantiate, add to list
           String formatClassName =
               CLASS_PREFIX + file.substring(0, file.indexOf(CLASS_EXTENSION) - 1);
-          Class<?> clas = Class.forName(formatClassName);
-          if (DumpFormat.class.isAssignableFrom(clas)
-              && !Modifier.isAbstract(clas.getModifiers())
-              && !Modifier.isInterface(clas.getModifiers())) {
-            formatList.add((DumpFormat) clas.newInstance());
+          Class<?> classObj = Class.forName(formatClassName);
+          if (DumpFormat.class.isAssignableFrom(classObj)
+              && !Modifier.isAbstract(classObj.getModifiers())
+              && !Modifier.isInterface(classObj.getModifiers())) {
+            formatList.add((DumpFormat) classObj.getDeclaredConstructor().newInstance());
           }
         } catch (Exception e) {
           System.out.println("Error instantiating DumpFormat from file " + file + ": " + e);

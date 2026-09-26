@@ -1,6 +1,6 @@
 package mars.mips.hardware;
 
-import java.util.*;
+import java.util.Observer;
 import mars.Globals;
 
 /*

@@ -74,10 +74,7 @@ public class LabelsWindow extends JInternalFrame {
   private JPanel labelPanel; // holds J
   private JCheckBox dataLabels, textLabels;
   private List<LabelsForSymbolTable> listOfLabelsForSymbolTable;
-  private LabelsWindow labelsWindow;
   private static final int MAX_DISPLAYED_CHARS = 24;
-  private static final int PREFERRED_NAME_COLUMN_WIDTH = 60;
-  private static final int PREFERRED_ADDRESS_COLUMN_WIDTH = 60;
   private static final int LABEL_COLUMN = 0;
   private static final int ADDRESS_COLUMN = 1;
   private static final String[] columnToolTips = {
@@ -158,7 +155,6 @@ public class LabelsWindow extends JInternalFrame {
     }
     columnNames = sortColumnHeadings[sortState];
     tableSortComparator = tableSortingComparators[sortState];
-    labelsWindow = this;
     contentPane = this.getContentPane();
     labelPanel = new JPanel(new GridLayout(1, 2, 10, 0));
     JPanel features = new JPanel();
