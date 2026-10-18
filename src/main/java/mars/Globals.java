@@ -69,6 +69,9 @@ public class Globals {
   /** Flag to determine if the theme is dark or light. * */
   public static boolean isDark = false;
 
+  /** Flag set when -Dsun.java2d.uiScale was given, overriding the interface scale setting. */
+  public static boolean uiScaleFromCommandLine = false;
+
   /** Object that contains various settings that can be accessed modified internally. * */
   static Settings settings;
 
@@ -88,7 +91,7 @@ public class Globals {
   static VenusUI gui = null;
 
   /** The current MARS version number. Can't wait for "initialize()" call to get it. */
-  public static final String version = "4.6.1";
+  public static final String version = "5.0.0";
 
   /** List of accepted file extensions for MIPS assembly source files. */
   public static final List<String> fileExtensions = getFileExtensions();

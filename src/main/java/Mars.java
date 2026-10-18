@@ -33,37 +33,55 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  * @version March 2006
  */
 import com.formdev.flatlaf.FlatLaf;
-import com.formdev.flatlaf.intellijthemes.FlatArcDarkIJTheme;
-import com.formdev.flatlaf.intellijthemes.FlatArcIJTheme;
+import com.formdev.flatlaf.fonts.inter.FlatInterFont;
+import com.formdev.flatlaf.fonts.jetbrains_mono.FlatJetBrainsMonoFont;
+import com.formdev.flatlaf.themes.FlatMacDarkLaf;
+import com.formdev.flatlaf.themes.FlatMacLightLaf;
 import com.jthemedetecor.OsThemeDetector;
-
-import mars.Globals;
-
+import java.awt.Insets;
+import java.awt.image.BufferedImage;
+import javax.swing.ImageIcon;
 import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
+import mars.Globals;
+import mars.Settings;
 
 public class Mars {
 
   public static void main(String[] args) {
+    // Java fixes the interface scale when graphics start up, so this has to come first.
+    String uiScale = Settings.getSavedUIScale();
+    if (System.getProperty("sun.java2d.uiScale") != null) {
+      Globals.uiScaleFromCommandLine = true;
+    } else if (!uiScale.isEmpty()) {
+      System.setProperty("sun.java2d.uiScale", uiScale);
+    }
+
+    FlatInterFont.install();
+    FlatJetBrainsMonoFont.install();
+    FlatLaf.setPreferredFontFamily(FlatInterFont.FAMILY);
+    FlatLaf.setPreferredLightFontFamily(FlatInterFont.FAMILY_LIGHT);
+    FlatLaf.setPreferredSemiboldFontFamily(FlatInterFont.FAMILY_SEMIBOLD);
+    FlatLaf.setPreferredMonospacedFontFamily(FlatJetBrainsMonoFont.FAMILY);
+
+    UIManager.put("SplitPaneDivider.style", "plain");
+    UIManager.put("ScrollBar.thumbArc", 999);
+    UIManager.put("ScrollBar.thumbInsets", new Insets(2, 2, 2, 2));
+    // Hide the Java coffee cup on the Execute tab's internal windows.
+    UIManager.put(
+        "InternalFrame.icon", new ImageIcon(new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB)));
+
     final OsThemeDetector detector = OsThemeDetector.getDetector();
     Globals.isDark = detector.isDark();
-
-    if (Globals.isDark) {
-      FlatArcDarkIJTheme.setup();
-    } else {
-      FlatArcIJTheme.setup();
-    }
+    FlatLaf.setup(theme(Globals.isDark));
 
     detector.registerListener(
         isDark -> {
           SwingUtilities.invokeLater(
               () -> {
                 try {
-                  if (isDark) {
-                    UIManager.setLookAndFeel(new FlatArcDarkIJTheme());
-                  } else {
-                    UIManager.setLookAndFeel(new FlatArcIJTheme());
-                  }
+                  Globals.isDark = isDark;
+                  UIManager.setLookAndFeel(theme(isDark));
                   FlatLaf.updateUI();
                 } catch (Exception e) {
                   e.printStackTrace();
@@ -72,5 +90,9 @@ public class Mars {
         });
 
     new mars.MarsLaunch(args);
+  }
+
+  private static FlatLaf theme(boolean dark) {
+    return dark ? new FlatMacDarkLaf() : new FlatMacLightLaf();
   }
 }

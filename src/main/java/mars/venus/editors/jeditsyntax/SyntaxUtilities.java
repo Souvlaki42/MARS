@@ -80,18 +80,30 @@ public class SyntaxUtilities {
 
     // SyntaxStyle constructor params: color, italic?, bold?
     // All need to be assigned even if not used by language (no gaps in array)
-    styles[Token.NULL] = new SyntaxStyle(Globals.isDark ? new Color(0x000000) : new Color(0x000000), false, false);
-    styles[Token.COMMENT1] = new SyntaxStyle(Globals.isDark ? new Color(0xccff66) : new Color(0x00cc33), true, false);
-    styles[Token.COMMENT2] = new SyntaxStyle(Globals.isDark ? new Color(0x990033) : new Color(0x990033), true, false);
-    styles[Token.KEYWORD1] = new SyntaxStyle(Globals.isDark ? new Color(0x0099ff) : new Color(0x0000ff), false, false);
-    styles[Token.KEYWORD2] = new SyntaxStyle(Globals.isDark ? new Color(0xfd3d85) : new Color(0xfd3d85), false, false);
-    styles[Token.KEYWORD3] = new SyntaxStyle(Globals.isDark ? new Color(0xff6666) : new Color(0xff0000), false, false);
-    styles[Token.LITERAL1] = new SyntaxStyle(Globals.isDark ? new Color(0x00cc33) : new Color(0x00cc33), false, false);
-    styles[Token.LITERAL2] = new SyntaxStyle(Globals.isDark ? new Color(0x00cc33) : new Color(0x00cc33), false, false);
-    styles[Token.LABEL] = new SyntaxStyle(Globals.isDark ? new Color(0xffff00) : new Color(0x000000), true, false);
-    styles[Token.OPERATOR] = new SyntaxStyle(Globals.isDark ? new Color(0x000000) : new Color(0x000000), false, true);
-    styles[Token.INVALID] = new SyntaxStyle(Globals.isDark ? new Color(0xff0000) : new Color(0xff0000), false, false);
-    styles[Token.MACRO_ARG] = new SyntaxStyle(Globals.isDark ? new Color(0x969600) : new Color(0x969600), false, false);
+    styles[Token.NULL] =
+        new SyntaxStyle(Globals.isDark ? new Color(0x000000) : new Color(0x000000), false, false);
+    styles[Token.COMMENT1] =
+        new SyntaxStyle(Globals.isDark ? new Color(0x7f848e) : new Color(0x8c8c8c), true, false);
+    styles[Token.COMMENT2] =
+        new SyntaxStyle(Globals.isDark ? new Color(0xbe5046) : new Color(0x990033), true, false);
+    styles[Token.KEYWORD1] =
+        new SyntaxStyle(Globals.isDark ? new Color(0x61afef) : new Color(0x0033b3), false, false);
+    styles[Token.KEYWORD2] =
+        new SyntaxStyle(Globals.isDark ? new Color(0xc678dd) : new Color(0x871094), false, false);
+    styles[Token.KEYWORD3] =
+        new SyntaxStyle(Globals.isDark ? new Color(0xe06c75) : new Color(0xc4302b), false, false);
+    styles[Token.LITERAL1] =
+        new SyntaxStyle(Globals.isDark ? new Color(0x98c379) : new Color(0x067d17), false, false);
+    styles[Token.LITERAL2] =
+        new SyntaxStyle(Globals.isDark ? new Color(0x98c379) : new Color(0x067d17), false, false);
+    styles[Token.LABEL] =
+        new SyntaxStyle(Globals.isDark ? new Color(0xe5c07b) : new Color(0x00627a), false, false);
+    styles[Token.OPERATOR] =
+        new SyntaxStyle(Globals.isDark ? new Color(0x000000) : new Color(0x000000), false, true);
+    styles[Token.INVALID] =
+        new SyntaxStyle(Globals.isDark ? new Color(0xf44747) : new Color(0xff0000), false, false);
+    styles[Token.MACRO_ARG] =
+        new SyntaxStyle(Globals.isDark ? new Color(0xd19a66) : new Color(0x9e880d), false, false);
     return styles;
   }
 

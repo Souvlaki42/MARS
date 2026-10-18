@@ -1,11 +1,14 @@
 package mars;
 
+import com.formdev.flatlaf.FlatLaf;
+import com.formdev.flatlaf.util.ColorFunctions;
 import java.awt.Color;
 import java.awt.Font;
 import java.util.Observable;
 import java.util.StringTokenizer;
 import java.util.prefs.BackingStoreException;
 import java.util.prefs.Preferences;
+import javax.swing.UIManager;
 import mars.util.Binary;
 import mars.util.EditorFont;
 import mars.venus.editors.jeditsyntax.SyntaxStyle;
@@ -222,6 +225,9 @@ public class Settings extends Observable {
   /** Default save directory when saving a new file */
   public static final int LAST_SAVE_DIRECTORY = 8;
 
+  /** Interface scale factor such as "1.5", or empty to let Java decide. Applies on restart. */
+  public static final int UI_SCALE = 9;
+
   // Match the above by position.
   private static final String[] stringSettingsKeys = {
     "ExceptionHandler",
@@ -232,7 +238,8 @@ public class Settings extends Observable {
     "EditorTabSize",
     "EditorPopupPrefixLength",
     "LastOpenDirectory",
-    "LastSaveDirectory"
+    "LastSaveDirectory",
+    "UIScale"
   };
 
   /**
@@ -249,7 +256,8 @@ public class Settings extends Observable {
     "8",
     "2",
     System.getProperty("user.dir"),
-    System.getProperty("user.dir")
+    System.getProperty("user.dir"),
+    ""
   };
 
   // FONT SETTINGS. Each array position has associated name.
@@ -316,14 +324,20 @@ public class Settings extends Observable {
   // See
   // http://www.mirthcorp.com/community/issues/browse/MIRTH-1921?page=com.atlassian.jira.plugin.system.issuetabpanels:all-tabpanel
   private static final String[] defaultFontFamilySettingsValues = {
-    "Monospaced", "Monospaced", "Monospaced", "Monospaced", "Monospaced", "Monospaced", "Monospaced"
+    "JetBrains Mono",
+    "JetBrains Mono",
+    "JetBrains Mono",
+    "JetBrains Mono",
+    "JetBrains Mono",
+    "JetBrains Mono",
+    "JetBrains Mono"
   };
 
   private static final String[] defaultFontStyleSettingsValues = {
     "Plain", "Plain", "Plain", "Plain", "Plain", "Plain", "Plain"
   };
   private static final String[] defaultFontSizeSettingsValues = {
-    "12", "12", "12", "12", "12", "12", "12",
+    "14", "12", "12", "12", "12", "12", "12",
   };
 
   // COLOR SETTINGS. Each array position has associated name.
@@ -935,6 +949,20 @@ public class Settings extends Observable {
   }
 
   /**
+   * Get the saved interface scale factor without creating a Settings object. It has to be read
+   * before any window is created, because Java fixes the scale when graphics start up.
+   *
+   * @return scale factor such as "1.5", or an empty string to let Java decide
+   */
+  public static String getSavedUIScale() {
+    try {
+      return Preferences.userNodeForPackage(Settings.class).get(stringSettingsKeys[UI_SCALE], "");
+    } catch (SecurityException se) {
+      return "";
+    }
+  }
+
+  /**
    * Get Color object for specified settings key. Returns null if key is not found or its value is
    * not a valid color encoding.
    *
@@ -964,7 +992,7 @@ public class Settings extends Observable {
    * @return corresponding Color, or null if argument invalid or value not valid color
    */
   public Color getColorSettingByPosition(int position) {
-    return getColorValueByPosition(position, colorSettingsValues);
+    return getThemedColorValueByPosition(position, colorSettingsValues);
   }
 
   /**
@@ -975,7 +1003,7 @@ public class Settings extends Observable {
    * @return corresponding default Color, or null if argument invalid or value not valid color
    */
   public Color getDefaultColorSettingByPosition(int position) {
-    return getColorValueByPosition(position, defaultColorSettingsValues);
+    return getThemedColorValueByPosition(position, defaultColorSettingsValues);
   }
 
   //////////////////////////////////////////////////////////////////////
@@ -1322,6 +1350,15 @@ public class Settings extends Observable {
   }
 
   /**
+   * Set the interface scale factor, used from the next start of MARS.
+   *
+   * @param scale scale factor such as "1.5", or an empty string to let Java decide
+   */
+  public void setUIScale(String scale) {
+    setStringSetting(UI_SCALE, scale);
+  }
+
+  /**
    * Set Color object for specified settings key. Has no effect if key is invalid.
    *
    * @param key the Setting key
@@ -1407,8 +1444,13 @@ public class Settings extends Observable {
 
   // Used by setter methods for color-based settings
   private void setColorSetting(int settingIndex, Color color) {
-    colorSettingsValues[settingIndex] =
-        Binary.intToHexString(color.getRed() << 16 | color.getGreen() << 8 | color.getBlue());
+    // Storing the theme's color would pin it, so keep the default to go on following the theme.
+    if (color.equals(getThemeColor(settingIndex))) {
+      colorSettingsValues[settingIndex] = defaultColorSettingsValues[settingIndex];
+    } else {
+      colorSettingsValues[settingIndex] =
+          Binary.intToHexString(color.getRed() << 16 | color.getGreen() << 8 | color.getBlue());
+    }
     saveColorSetting(settingIndex);
   }
 
@@ -1423,6 +1465,58 @@ public class Settings extends Observable {
       }
     }
     return null;
+  }
+
+  // Like getColorValueByPosition, but a color still at its default value is replaced by the
+  // matching color of the active FlatLaf theme, so the tables fit both light and dark themes.
+  private Color getThemedColorValueByPosition(int position, String[] values) {
+    Color color = getColorValueByPosition(position, values);
+    if (color != null
+        && color.equals(getColorValueByPosition(position, defaultColorSettingsValues))) {
+      Color themeColor = getThemeColor(position);
+      if (themeColor != null) {
+        return themeColor;
+      }
+    }
+    return color;
+  }
+
+  // Theme color standing in for the default of a color setting, or null outside FlatLaf.
+  private Color getThemeColor(int position) {
+    if (!(UIManager.getLookAndFeel() instanceof FlatLaf)) {
+      return null;
+    }
+    boolean dark = FlatLaf.isLafDark();
+    Color background = UIManager.getColor("Table.background");
+    Color foreground = UIManager.getColor("Table.foreground");
+    Color color;
+    switch (position) {
+      case EVEN_ROW_BACKGROUND:
+        color =
+            dark
+                ? ColorFunctions.lighten(background, 0.03f)
+                : ColorFunctions.darken(background, 0.03f);
+        break;
+      case ODD_ROW_BACKGROUND:
+        color = background;
+        break;
+      case TEXTSEGMENT_HIGHLIGHT_BACKGROUND:
+        color = new Color(dark ? 0x5c5326 : 0xfff3b0);
+        break;
+      case TEXTSEGMENT_DELAYSLOT_HIGHLIGHT_BACKGROUND:
+        color = new Color(dark ? 0x2f5a2a : 0xc9efc0);
+        break;
+      case DATASEGMENT_HIGHLIGHT_BACKGROUND:
+        color = new Color(dark ? 0x2b4f73 : 0xcfe3fc);
+        break;
+      case REGISTER_HIGHLIGHT_BACKGROUND:
+        color = new Color(dark ? 0x3f5f2a : 0xd5ecc2);
+        break;
+      default: // row and highlight foregrounds
+        color = foreground;
+    }
+    // Copy so that components don't treat it as a replaceable look and feel default.
+    return new Color(color.getRGB());
   }
 
   // Get Color object for this key array position. Get it from values array

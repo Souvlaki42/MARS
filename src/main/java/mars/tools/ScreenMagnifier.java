@@ -112,7 +112,7 @@ class Magnifier extends JFrame implements ComponentListener {
     createSettings();
     // If running withint MARS, set to its icon image; if not fuggetit.
     try {
-      this.setIconImage(mars.Globals.getGui().getIconImage());
+      this.setIconImages(mars.Globals.getGui().getIconImages());
     } catch (Exception e) {
     }
     getContentPane().setLayout(new BorderLayout());

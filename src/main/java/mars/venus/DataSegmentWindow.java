@@ -121,23 +121,9 @@ public class DataSegmentWindow extends JInternalFrame implements Observer {
     contentPane = this.getContentPane();
     tablePanel = new JPanel(new GridLayout(1, 2, 10, 0));
     JPanel features = new JPanel();
-    Toolkit tk = Toolkit.getDefaultToolkit();
-    Class<?> cs = this.getClass();
     try {
-      prevButton =
-          new PrevButton(
-              new ImageIcon(
-                  tk.getImage(
-                      cs.getResource(
-                          Globals.imagesPath
-                              + "Previous22.png")))); // "Back16.gif"))));//"Down16.gif"))));
-      nextButton =
-          new NextButton(
-              new ImageIcon(
-                  tk.getImage(
-                      cs.getResource(
-                          Globals.imagesPath
-                              + "Next22.png")))); // "Forward16.gif")))); //"Up16.gif"))));
+      prevButton = new PrevButton(VenusUI.icon("prev", 18));
+      nextButton = new NextButton(VenusUI.icon("next", 18));
       //  This group of buttons was replaced by a combo box.  Keep the JButton objects for their
       // action listeners.
       dataButton = new JButton(); // ".data");

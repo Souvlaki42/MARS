@@ -4,23 +4,86 @@ on:
   push:
     tags:
       - "v*"
+  # Manual runs only build; the packages are attached to the run as artifacts.
+  workflow_dispatch:
 
 jobs:
-  build:
+  # jpackage can't cross-build, so each native package is built on its own OS.
+  linux:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v6
-      - name: Setup Java 
+      # Temurin, because jlink (used by jpackage) refuses JDKs with a modified security config.
+      - name: Setup Java
         uses: actions/setup-java@v5
         with:
-          distribution: redhat
+          distribution: temurin
           java-version: "25"
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v6
+      - name: Install appimagetool
+        working-directory: ${{ runner.temp }}
+        run: |
+          curl -fsSL -o appimagetool.AppImage https://github.com/AppImage/appimagetool/releases/download/1.9.1/appimagetool-x86_64.AppImage
+          echo "ed4ce84f0d9caff66f50bcca6ff6f35aae54ce8135408b3fa33abfc3cb384eb0  appimagetool.AppImage" | sha256sum -c -
+          chmod +x appimagetool.AppImage
+          # Extract instead of mounting, since the runner has no FUSE.
+          ./appimagetool.AppImage --appimage-extract > /dev/null
+          echo "APPIMAGETOOL=$PWD/squashfs-root/AppRun" >> "$GITHUB_ENV"
       - name: Build
-        run: ./gradlew clean distZip
+        run: ./gradlew clean distZip appImage
+      - name: Upload
+        uses: actions/upload-artifact@v7
+        with:
+          name: linux
+          path: |
+            build/distributions/*.zip
+            build/distributions/*.AppImage
+
+  windows:
+    runs-on: windows-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+      - name: Setup Java
+        uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: "25"
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v6
+      # jpackage builds the MSI with WiX. 5 is the newest major jpackage supports, and it needs
+      # the UI and Util extensions installed globally.
+      - name: Install WiX
+        run: |
+          dotnet tool install --global wix --version 5.0.2
+          $tools = "$env:USERPROFILE\.dotnet\tools"
+          & "$tools\wix.exe" extension add --global WixToolset.UI.wixext/5.0.2 WixToolset.Util.wixext/5.0.2
+          Add-Content $env:GITHUB_PATH $tools
+      - name: Build
+        run: .\gradlew.bat clean portableZip windowsMsi
+      - name: Upload
+        uses: actions/upload-artifact@v7
+        with:
+          name: windows
+          path: |
+            build/distributions/*.zip
+            build/distributions/*.msi
+
+  release:
+    needs: [linux, windows]
+    if: startsWith(github.ref, 'refs/tags/v')
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Download
+        uses: actions/download-artifact@v8
+        with:
+          path: dist
+          merge-multiple: true
       - name: Release
         uses: softprops/action-gh-release@v3
         with:
-          files: build/distributions/*.zip
+          files: dist/*

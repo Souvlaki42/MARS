@@ -15,7 +15,6 @@ import java.awt.Image;
 import java.awt.MouseInfo;
 import java.awt.PointerInfo;
 import java.awt.RenderingHints;
-import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
@@ -275,13 +274,11 @@ public class MipsXray extends AbstractMarsToolAndApplication {
 
   // set action in the menu bar.
   private void createActionObjects() {
-    Toolkit tk = Toolkit.getDefaultToolkit();
-    Class<?> cs = this.getClass();
     try {
       runAssembleAction =
           new RunAssembleAction(
               "Assemble",
-              new ImageIcon(tk.getImage(cs.getResource(Globals.imagesPath + "Assemble22.png"))),
+              VenusUI.icon("assemble", 18),
               "Assemble the current file and clear breakpoints",
               KeyEvent.VK_A,
               KeyStroke.getKeyStroke(KeyEvent.VK_F3, 0),
@@ -290,7 +287,7 @@ public class MipsXray extends AbstractMarsToolAndApplication {
       runStepAction =
           new RunStepAction(
               "Step",
-              new ImageIcon(tk.getImage(cs.getResource(Globals.imagesPath + "StepForward22.png"))),
+              VenusUI.icon("step", 18),
               "Run one step at a time",
               KeyEvent.VK_T,
               KeyStroke.getKeyStroke(KeyEvent.VK_F7, 0),
@@ -298,7 +295,7 @@ public class MipsXray extends AbstractMarsToolAndApplication {
       runBackstepAction =
           new RunBackstepAction(
               "Backstep",
-              new ImageIcon(tk.getImage(cs.getResource(Globals.imagesPath + "StepBack22.png"))),
+              VenusUI.icon("backstep", 18),
               "Undo the last step",
               KeyEvent.VK_B,
               KeyStroke.getKeyStroke(KeyEvent.VK_F8, 0),

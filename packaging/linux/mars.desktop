@@ -1,0 +1,8 @@
+[Desktop Entry]
+Type=Application
+Name=MARS
+Comment=MIPS Assembler and Runtime Simulator
+Exec=MARS
+Icon=mars
+Categories=Development;IDE;
+Terminal=false

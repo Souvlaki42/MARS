@@ -61,6 +61,6 @@ public class HelpAboutAction extends GuiAction {
             + "Java Examples in a Nutshell 3rd Edition, O'Reilly, ISBN 0-596-00620-9.",
         "About Mars",
         JOptionPane.INFORMATION_MESSAGE,
-        new ImageIcon("images/RedMars50.gif"));
+        new ImageIcon(getClass().getResource(Globals.imagesPath + "mars-64.png")));
   }
 }

@@ -4,7 +4,7 @@ plugins {
     id('application')
 }
 
-version = '4.6.1'
+version = '5.0.0'
 
 application {
     // Define the main class for the application.
@@ -24,7 +24,138 @@ jar {
         attributes['Implementation-Title'] = project.name
         attributes['Implementation-Version'] = project.version
         attributes['Main-Class'] = application.mainClass
+        attributes['Multi-Release'] = 'true'
     }
+
+    // Bundle runtime dependencies so the jar runs standalone with `java -jar`.
+    from {
+        configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) }
+    }
+    exclude('META-INF/*.SF', 'META-INF/*.DSA', 'META-INF/*.RSA', 'META-INF/*.EC')
+    exclude('module-info.class', 'META-INF/versions/*/module-info.class')
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+}
+
+// Native packages: jpackage builds a MARS folder with its own trimmed Java runtime,
+// which is then zipped as a portable build or wrapped into an AppImage.
+// jpackage can't cross-build, so build each OS's package on that OS.
+def osName = System.getProperty('os.name').toLowerCase()
+def isWindows = osName.contains('windows')
+def isLinux = osName.contains('linux')
+def osArch = System.getProperty('os.arch') == 'amd64' ? 'x86_64' : System.getProperty('os.arch')
+def jpackageInputDir = layout.buildDirectory.dir('jpackage-input')
+def jpackageDir = layout.buildDirectory.dir('jpackage')
+def appDir = layout.buildDirectory.dir('appimage/MARS.AppDir')
+
+interface InjectedFs {
+    @Inject FileSystemOperations getFs()
+}
+def injected = objects.newInstance(InjectedFs)
+
+def stageJar = tasks.register('stageJar', Sync) {
+    from tasks.named('jar')
+    into jpackageInputDir
+}
+
+// The launchers and metadata shared by every jpackage task. The vendor and copyright end up in the
+// exe's version info, which antivirus heuristics count against an exe when they're left "Unknown".
+def configureJpackage = { Exec task ->
+    task.dependsOn stageJar
+    task.inputs.dir(jpackageInputDir)
+    task.inputs.dir('packaging')
+
+    // Some distro JDKs (e.g. Fedora's) ship without jmods and with a modified security config,
+    // which breaks jlink. -PjpackageJdk=/path/to/jdk points jpackage at a different JDK.
+    def jdk = providers.gradleProperty('jpackageJdk').getOrElse(System.getProperty('java.home'))
+    task.executable = new File(jdk, isWindows ? 'bin/jpackage.exe' : 'bin/jpackage').path
+    task.args '--name', 'MARS',
+        '--app-version', project.version.toString(),
+        '--description', 'MIPS Assembler and Runtime Simulator',
+        '--vendor', 'Pete Sanderson and Kenneth Vollmar',
+        '--copyright', 'Copyright (c) 2003-2014 Pete Sanderson and Kenneth Vollmar',
+        '--input', jpackageInputDir.get().asFile.path,
+        '--main-jar', tasks.named('jar').get().archiveFileName.get(),
+        '--add-modules', 'java.base,java.desktop,java.logging,java.naming,java.prefs'
+    if (isWindows) {
+        task.args '--icon', file('src/main/resources/images/mars.ico').path,
+            '--add-launcher', "MARS-cli=${file('packaging/windows/MARS-cli.properties').path}"
+    } else if (isLinux) {
+        task.args '--icon', file('packaging/linux/mars.png').path
+    }
+}
+
+def jpackageImage = tasks.register('jpackageImage', Exec) {
+    group = 'distribution'
+    description = 'Builds a MARS app folder that bundles its own Java runtime.'
+    configureJpackage(it)
+    outputs.dir(jpackageDir)
+    args '--type', 'app-image', '--dest', jpackageDir.get().asFile.path
+
+    // jpackage refuses to overwrite an existing image.
+    doFirst { injected.fs.delete { delete jpackageDir } }
+}
+
+tasks.register('portableZip', Zip) {
+    group = 'distribution'
+    description = 'Zips the jpackage app folder into a portable build that needs no installed Java.'
+    from jpackageImage
+    archiveFileName = "MARS-${project.version}-${isWindows ? 'windows' : osName.split(' ')[0]}-${osArch}.zip"
+    destinationDirectory = layout.buildDirectory.dir('distributions')
+}
+
+// An installer rather than a self-extracting exe: an exe that unpacks itself and runs what it
+// unpacked looks like a malware dropper to antivirus heuristics, so it kept getting flagged.
+tasks.register('windowsMsi', Exec) {
+    group = 'distribution'
+    description = 'Builds a Windows MSI installer. Needs WiX 3, or WiX 4/5 with the UI and Util extensions, on PATH.'
+    onlyIf('MSI installers can only be built on Windows') { isWindows }
+    configureJpackage(it)
+    def dest = layout.buildDirectory.dir('jpackage-msi')
+    def output = layout.buildDirectory.file("distributions/MARS-${project.version}-windows-${osArch}.msi")
+    outputs.file(output)
+    args '--type', 'msi',
+        '--dest', dest.get().asFile.path,
+        '--win-menu',
+        '--win-shortcut',
+        '--win-shortcut-prompt',
+        '--win-dir-chooser',
+        // Must never change, so that installing a newer MSI upgrades the installed version.
+        '--win-upgrade-uuid', '2618adc9-3416-4355-9dc5-f62c2cf09ad5'
+
+    doFirst { injected.fs.delete { delete dest } }
+    // jpackage always names it MARS-<version>.msi, so rename it to match the other packages.
+    doLast {
+        injected.fs.copy {
+            from dest
+            include '*.msi'
+            into output.get().asFile.parentFile
+            rename { output.get().asFile.name }
+        }
+    }
+}
+
+def appDirTask = tasks.register('appDir', Sync) {
+    from jpackageImage
+    from('packaging/linux') {
+        filePermissions { unix('rwxr-xr-x') }
+        include 'AppRun'
+    }
+    from('packaging/linux') { include 'mars.desktop', 'mars.png' }
+    into appDir
+}
+
+tasks.register('appImage', Exec) {
+    group = 'distribution'
+    description = 'Wraps the jpackage app folder into a Linux AppImage. Needs appimagetool on PATH or in $APPIMAGETOOL.'
+    onlyIf('AppImages can only be built on Linux') { isLinux }
+    dependsOn appDirTask
+    def output = layout.buildDirectory.file("distributions/MARS-${project.version}-${osArch}.AppImage")
+    inputs.dir(appDir)
+    outputs.file(output)
+
+    executable = providers.environmentVariable('APPIMAGETOOL').getOrElse('appimagetool')
+    environment 'ARCH', osArch
+    args appDir.get().asFile.path, output.get().asFile.path
 }
 
 dependencies {
@@ -32,8 +163,9 @@ dependencies {
     implementation('com.github.Dansoftowner:jSystemThemeDetector:3.9.1')
     implementation('ch.qos.logback:logback-core:1.6.3')
     implementation('ch.qos.logback:logback-classic:1.6.3')
-    implementation('com.formdev:flatlaf-intellij-themes:3.7.2')
-    implementation("com.diffplug.spotless:com.diffplug.spotless.gradle.plugin:8.10.3")
+    implementation('com.formdev:flatlaf-extras:3.7.2')
+    implementation('com.formdev:flatlaf-fonts-inter:4.1')
+    implementation('com.formdev:flatlaf-fonts-jetbrains-mono:2.304')
 }
 
 spotless {

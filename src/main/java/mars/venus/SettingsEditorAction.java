@@ -81,6 +81,14 @@ public class SettingsEditorAction extends GuiAction {
   private static final String ITALIC_BUTTON_TOOL_TIP_TEXT = "I";
 
   private static final String TAB_SIZE_TOOL_TIP_TEXT = "Current tab size in characters";
+  private static final String UI_SCALE_TOOL_TIP_TEXT =
+      "Size of the whole interface, for high resolution screens. Takes effect after restarting MARS";
+  // Interface scale slider positions are in quarters: 4 = 100%, 12 = 300%.
+  private static final int MIN_UI_SCALE = 4;
+  private static final int MAX_UI_SCALE = 12;
+  // Java on Linux rounds the scale down to a whole number, so only offer whole steps there.
+  private static final int UI_SCALE_STEP =
+      System.getProperty("os.name").toLowerCase().contains("linux") ? 4 : 1;
   private static final String BLINK_SPINNER_TOOL_TIP_TEXT = "Current blinking rate in milliseconds";
   private static final String BLINK_SAMPLE_TOOL_TIP_TEXT = "Displays current blinking rate";
   private static final String CURRENT_LINE_HIGHLIGHT_TOOL_TIP_TEXT =
@@ -106,8 +114,8 @@ public class SettingsEditorAction extends GuiAction {
     private Font previewFont;
 
     private JPanel dialogPanel, syntaxStylePanel, otherSettingsPanel; // ///4 Aug 2010
-
-    private JSlider tabSizeSelector;
+    private JSlider tabSizeSelector, uiScaleSelector;
+    private JLabel uiScaleValue;
     private JSpinner tabSizeSpinSelector, blinkRateSpinSelector, popupPrefixLengthSpinSelector;
     private JCheckBox lineHighlightCheck, genericEditorCheck, autoIndentCheck;
     private Caret blinkCaret;
@@ -119,6 +127,7 @@ public class SettingsEditorAction extends GuiAction {
     private boolean syntaxStylesAction = false;
 
     private int initialEditorTabSize, initialCaretBlinkRate, initialPopupGuidance;
+    private int initialUIScale, appliedUIScale;
     private boolean initialLineHighlighting, initialGenericTextEditor, initialAutoIndent;
 
     public EditorFontDialog(Frame owner, String title, boolean modality, Font font) {
@@ -226,6 +235,19 @@ public class SettingsEditorAction extends GuiAction {
       Globals.getSettings()
           .setCaretBlinkRate(((Integer) blinkRateSpinSelector.getValue()).intValue());
       Globals.getSettings().setEditorTabSize(tabSizeSelector.getValue());
+      if (uiScaleSelector.getValue() != appliedUIScale) {
+        appliedUIScale = uiScaleSelector.getValue();
+        Globals.getSettings().setUIScale(Double.toString(appliedUIScale / 4.0));
+        String message = "Restart MARS to apply the new interface scale.";
+        if (Globals.uiScaleFromCommandLine) {
+          message +=
+              "\n\nMARS was started with -Dsun.java2d.uiScale="
+                  + System.getProperty("sun.java2d.uiScale")
+                  + ", which overrides this setting.\nRemove it from the command to use this one.";
+        }
+        JOptionPane.showMessageDialog(
+            this, message, "Interface Scale", JOptionPane.INFORMATION_MESSAGE);
+      }
       if (syntaxStylesAction) {
         for (int i = 0; i < syntaxStyleIndex.length; i++) {
           Globals.getSettings()
@@ -263,6 +285,7 @@ public class SettingsEditorAction extends GuiAction {
     private void resetOtherSettings() {
       tabSizeSelector.setValue(initialEditorTabSize);
       tabSizeSpinSelector.setValue(initialEditorTabSize);
+      uiScaleSelector.setValue(initialUIScale);
       lineHighlightCheck.setSelected(initialLineHighlighting);
       autoIndentCheck.setSelected(initialAutoIndent);
       blinkRateSpinSelector.setValue(initialCaretBlinkRate);
@@ -299,6 +322,26 @@ public class SettingsEditorAction extends GuiAction {
             public void stateChanged(ChangeEvent e) {
               Object value = ((JSpinner) e.getSource()).getValue();
               tabSizeSelector.setValue(((Integer) value).intValue());
+            }
+          });
+
+      // Interface scale selector, starting at the scale MARS is running with
+      double currentScale =
+          Globals.getGui().getGraphicsConfiguration().getDefaultTransform().getScaleX();
+      int steps = (int) Math.round(currentScale * 4 / UI_SCALE_STEP);
+      initialUIScale =
+          appliedUIScale = Math.max(MIN_UI_SCALE, Math.min(MAX_UI_SCALE, steps * UI_SCALE_STEP));
+      uiScaleSelector = new JSlider(MIN_UI_SCALE, MAX_UI_SCALE, initialUIScale);
+      uiScaleSelector.setMajorTickSpacing(4);
+      uiScaleSelector.setMinorTickSpacing(UI_SCALE_STEP);
+      uiScaleSelector.setPaintTicks(true);
+      uiScaleSelector.setSnapToTicks(true);
+      uiScaleSelector.setToolTipText(UI_SCALE_TOOL_TIP_TEXT);
+      uiScaleValue = new JLabel(initialUIScale * 25 + "%");
+      uiScaleSelector.addChangeListener(
+          new ChangeListener() {
+            public void stateChanged(ChangeEvent e) {
+              uiScaleValue.setText(uiScaleSelector.getValue() * 25 + "%");
             }
           });
 
@@ -349,8 +392,14 @@ public class SettingsEditorAction extends GuiAction {
       blinkPanel.add(blinkRateSpinSelector);
       blinkPanel.add(blinkSample);
 
+      JPanel uiScalePanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+      uiScalePanel.add(new JLabel("Interface Scale"));
+      uiScalePanel.add(uiScaleSelector);
+      uiScalePanel.add(uiScaleValue);
+
       otherSettingsPanel.setLayout(new GridLayout(1, 2));
-      JPanel leftColumnSettingsPanel = new JPanel(new GridLayout(4, 1));
+      JPanel leftColumnSettingsPanel = new JPanel(new GridLayout(5, 1));
+      leftColumnSettingsPanel.add(uiScalePanel);
       leftColumnSettingsPanel.add(tabPanel);
       leftColumnSettingsPanel.add(blinkPanel);
       leftColumnSettingsPanel.add(lineHighlightCheck);
